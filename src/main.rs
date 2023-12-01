@@ -29,47 +29,29 @@ fn main() {
     ];
 
     for line in lines {
-        println!("{line}");
+        // println!("{line}");
 
-        let mut first_digit_index = line.len();
-        let mut first_digit: Option<u32> = None;
-        for number in numbers.clone() {
-            match line.find(number) {
-                Some(index) => {
-                    if index <= first_digit_index {
-                        first_digit_index = index;
-                        let a = &line[index..index + number.len()];
-                        let b = to_number(a);
-                        first_digit = Some(b);
-                        // println!("found:{a}, parsed:{b}");
-                    }
-                }
-                None => continue,
-            }
-        }
+        let (first_digit_index, first_digit) = numbers
+            .iter()
+            .map(|num| (line.find(num), num))
+            .filter(|(idx, _)| idx.is_some())
+            .map(|(idx, num)| (idx.unwrap(), num))
+            .min_by_key(|(idx, _)| *idx)
+            .unwrap();
+        let first_digit =
+            to_number(&line[first_digit_index..first_digit_index + first_digit.len()]);
 
-        let mut last_digit_index = 0;
-        let mut last_digit: Option<u32> = None;
-        for number in numbers.clone() {
-            match line.rfind(number) {
-                Some(index) => {
-                    if index >= last_digit_index {
-                        last_digit_index = index;
-                        let a = &line[index..index + number.len()];
-                        let b = to_number(a);
-                        last_digit = Some(b);
-                        // println!("found:{a}, parsed:{b}");
-                    }
-                }
-                None => continue,
-            }
-        }
+        let (last_digit_index, last_digit) = numbers
+            .iter()
+            .map(|num| (line.rfind(num), num))
+            .filter(|(idx, _)| idx.is_some())
+            .map(|(idx, num)| (idx.unwrap(), num))
+            .max_by_key(|(idx, _)| *idx)
+            .unwrap();
+        let last_digit = to_number(&line[last_digit_index..last_digit_index + last_digit.len()]);
 
-        let first = first_digit.unwrap();
-        let last = last_digit.unwrap();
-        let res = first * 10 + last;
-        total += res;
-        // println!("first:{first}, last:{last}, res:{res}");
+        total += first_digit * 10 + last_digit;
+        // println!("first:{first_digit}, last:{last_digit}");
     }
 
     println!("total: {total}");
