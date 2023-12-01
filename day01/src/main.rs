@@ -30,13 +30,7 @@ fn part_1(lines: Lines) {
     for line in lines {
         // println!("{line}");
 
-        // FIXME: How can we unwrap all Some(d) without doing .filter().map()?
-        let digits = line
-            .chars()
-            .map(|c| c.to_digit(10))
-            .filter(|d| d.is_some())
-            .map(|d| d.unwrap());
-
+        let digits = line.chars().map(|c| c.to_digit(10)).filter_map(|d| d);
         let first_digit = digits.clone().next().unwrap();
         let last_digit = digits.clone().rev().next().unwrap();
 
@@ -61,8 +55,7 @@ fn part_2(lines: Lines) {
         let (first_digit_index, first_digit) = numbers
             .iter()
             .map(|num| (line.find(num), num))
-            .filter(|(idx, _)| idx.is_some())
-            .map(|(idx, num)| (idx.unwrap(), num))
+            .filter_map(|(idx, num)| idx.map(|idx| (idx, num)))
             .min_by_key(|(idx, _)| *idx)
             .unwrap();
         let first_digit =
@@ -71,8 +64,7 @@ fn part_2(lines: Lines) {
         let (last_digit_index, last_digit) = numbers
             .iter()
             .map(|num| (line.rfind(num), num))
-            .filter(|(idx, _)| idx.is_some())
-            .map(|(idx, num)| (idx.unwrap(), num))
+            .filter_map(|(idx, num)| idx.map(|idx| (idx, num)))
             .max_by_key(|(idx, _)| *idx)
             .unwrap();
         let last_digit = to_number(&line[last_digit_index..last_digit_index + last_digit.len()]);
