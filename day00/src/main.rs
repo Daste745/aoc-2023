@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use std::{fs::read_to_string, str::Lines};
 
 fn main() {
