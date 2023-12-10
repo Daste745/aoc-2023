@@ -7,11 +7,11 @@ use std::{collections::HashMap, fs::read_to_string, str::Lines};
 fn main() {
     println!("==== Part 1 output ====");
     part_1(read_to_string("day07/part1.input.txt").unwrap().lines());
-    println!("\n==== Part 2 output ====");
-    part_2(read_to_string("day07/part1.input.txt").unwrap().lines());
+    //     println!("\n==== Part 2 output ====");
+    //     part_2(read_to_string("day07/part2.input.txt").unwrap().lines());
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, PartialOrd)]
 enum HandType {
     FiveOfAKind,
     FourOfAKind,
@@ -24,35 +24,12 @@ enum HandType {
 
 impl From<&str> for HandType {
     fn from(value: &str) -> Self {
-        let joker_count = value.chars().filter(|c| *c == 'J').count();
-        if joker_count == 0 || joker_count == 5 {
-            return Self::resolve_card_type(&value);
-        } else {
-            // Find all possibilities after changing Joker cards to other ones in the hand
-            let possibilities = value.chars().filter(|c| *c != 'J').flat_map(|card| {
-                (1..(joker_count + 1)).map(move |i| {
-                    Self::resolve_card_type(
-                        value.replacen('J', card.to_string().as_str(), i).as_str(),
-                    )
-                })
-            });
-            // dbg!(possibilities.clone().collect::<Vec<HandType>>());
-            return possibilities
-                .max_by(|a, b| b.partial_cmp(a).unwrap())
-                .unwrap()
-                .to_owned();
-        }
-    }
-}
-
-impl HandType {
-    fn resolve_card_type(value: &str) -> Self {
         let mut card_counts: HashMap<char, usize> = HashMap::new();
         value
             .chars()
             .for_each(|c| *card_counts.entry(c).or_default() += 1);
 
-        if card_counts.values().any(|v| *v == 5) {
+        if card_counts.len() == 1 {
             return Self::FiveOfAKind;
         }
         if card_counts.values().any(|v| *v == 4) {
@@ -73,7 +50,8 @@ impl HandType {
         if card_counts.len() == 5 {
             return Self::HighCard;
         }
-        panic!("No HandType match");
+
+        panic!("No HandType match for {value}");
     }
 }
 
@@ -82,6 +60,7 @@ enum Card {
     A,
     K,
     Q,
+    J,
     T,
     Nine,
     Eight,
@@ -91,7 +70,6 @@ enum Card {
     Four,
     Three,
     Two,
-    J,
 }
 
 impl From<char> for Card {
@@ -179,26 +157,4 @@ fn part_1(lines: Lines) {
     println!("total: {total}");
 }
 
-fn part_2(lines: Lines) {
-    let mut hands: Vec<Hand> = Vec::new();
-
-    for line in lines {
-        let mut parts = line.split_whitespace();
-        let hand_str = parts.next().unwrap();
-        let bid = parts.next().unwrap().parse::<usize>().unwrap();
-        let hand = Hand::from_str(hand_str, bid);
-        hands.push(hand);
-        // dbg!(hand);
-    }
-
-    // Sort weakest to strongest
-    hands.sort_by(|a, b| b.partial_cmp(&a).unwrap());
-    // dbg!(hands);
-
-    let total = hands
-        .iter()
-        .enumerate()
-        .map(|(idx, hand)| (idx + 1) * hand.bid)
-        .sum::<usize>();
-    println!("total: {total}");
-}
+fn part_2(lines: Lines) {}
