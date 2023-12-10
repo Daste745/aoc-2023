@@ -22,8 +22,12 @@ enum HandType {
     HighCard,
 }
 
-impl From<&str> for HandType {
-    fn from(value: &str) -> Self {
+impl HandType {
+    fn from_str_part1(value: &str) -> Self {
+        Self::resolve_card_type(value)
+    }
+
+    fn from_str_part2(value: &str) -> Self {
         let joker_count = value.chars().filter(|c| *c == 'J').count();
         if joker_count == 0 || joker_count == 5 {
             return Self::resolve_card_type(&value);
@@ -43,9 +47,7 @@ impl From<&str> for HandType {
                 .to_owned();
         }
     }
-}
 
-impl HandType {
     fn resolve_card_type(value: &str) -> Self {
         let mut card_counts: HashMap<char, usize> = HashMap::new();
         value
@@ -82,6 +84,7 @@ enum Card {
     A,
     K,
     Q,
+    J,
     T,
     Nine,
     Eight,
@@ -91,11 +94,10 @@ enum Card {
     Four,
     Three,
     Two,
-    J,
 }
 
-impl From<char> for Card {
-    fn from(value: char) -> Self {
+impl Card {
+    fn from_str_part1(value: char) -> Self {
         match value {
             'A' => Self::A,
             'K' => Self::K,
@@ -113,6 +115,26 @@ impl From<char> for Card {
             _ => panic!(),
         }
     }
+
+    fn from_str_part2(value: char) -> Self {
+        match value {
+            'A' => Self::A,
+            'K' => Self::K,
+            'Q' => Self::Q,
+            // Shift over to keep the same enum structure
+            'T' => Self::J,
+            '9' => Self::T,
+            '8' => Self::Nine,
+            '7' => Self::Eight,
+            '6' => Self::Seven,
+            '5' => Self::Six,
+            '4' => Self::Five,
+            '3' => Self::Four,
+            '2' => Self::Three,
+            'J' => Self::Two,
+            _ => panic!(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -123,10 +145,18 @@ struct Hand {
 }
 
 impl Hand {
-    fn from_str(hand_str: &str, bid: usize) -> Hand {
+    fn from_str_part1(hand_str: &str, bid: usize) -> Hand {
         Self {
-            type_: HandType::from(hand_str),
-            cards: hand_str.chars().map(|c| Card::from(c)).collect(),
+            type_: HandType::from_str_part1(hand_str),
+            cards: hand_str.chars().map(|c| Card::from_str_part1(c)).collect(),
+            bid,
+        }
+    }
+
+    fn from_str_part2(hand_str: &str, bid: usize) -> Hand {
+        Self {
+            type_: HandType::from_str_part2(hand_str),
+            cards: hand_str.chars().map(|c| Card::from_str_part2(c)).collect(),
             bid,
         }
     }
@@ -162,7 +192,7 @@ fn part_1(lines: Lines) {
         let mut parts = line.split_whitespace();
         let hand_str = parts.next().unwrap();
         let bid = parts.next().unwrap().parse::<usize>().unwrap();
-        let hand = Hand::from_str(hand_str, bid);
+        let hand = Hand::from_str_part1(hand_str, bid);
         hands.push(hand);
         // dbg!(hand);
     }
@@ -186,7 +216,7 @@ fn part_2(lines: Lines) {
         let mut parts = line.split_whitespace();
         let hand_str = parts.next().unwrap();
         let bid = parts.next().unwrap().parse::<usize>().unwrap();
-        let hand = Hand::from_str(hand_str, bid);
+        let hand = Hand::from_str_part2(hand_str, bid);
         hands.push(hand);
         // dbg!(hand);
     }
